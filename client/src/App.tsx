@@ -1,103 +1,39 @@
 import { useEffect, useState } from 'react'
-
-// Change the type to reflect book fields
-type Book = { id: number; title: string; author: string }
+import { fetchBooks, Book } from './api/books'
+import BookForm from './components/BookForm'
+import BookCard from './components/BookCard'
 
 function App() {
-  const [books, setBooks]             = useState<Book[]>([])
-  const [titleInput, setTitleInput]   = useState('')
-  const [authorInput, setAuthorInput] = useState('')
-  const [editingId, setEditingId]     = useState<number | null>(null)
-  const [editingTitle, setEditingTitle]   = useState('')
-  const [editingAuthor, setEditingAuthor] = useState('')
+  const [books, setBooks] = useState<Book[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/books')
-      .then(res => res.json())
-      .then(data => setBooks(data))
+    fetchBooks().then(data => setBooks(data))
   }, [])
 
-  const addBook = () => {
-    fetch('http://localhost:3001/api/books', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: titleInput, author: authorInput })
-    })
-      .then(res => res.json())
-      .then(newBook => {
-        setBooks([...books, newBook])
-        setTitleInput('')
-        setAuthorInput('')
-      })
+  const handleBookAdded = (book: Book) => {
+    setBooks(prev => [...prev, book])
   }
 
-  const startEditing = (book: Book) => {
-    setEditingId(book.id)
-    setEditingTitle(book.title)
-    setEditingAuthor(book.author)
+  const handleBookUpdated = (updated: Book) => {
+    setBooks(prev => prev.map(b => b.id === updated.id ? updated : b))
   }
 
-  const saveEdit = () => {
-    fetch(`http://localhost:3001/api/books/${editingId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: editingTitle, author: editingAuthor })
-    })
-      .then(res => res.json())
-      .then(updatedBook => {
-        setBooks(books.map(b => b.id === updatedBook.id ? updatedBook : b))
-        setEditingId(null)
-        setEditingTitle('')
-        setEditingAuthor('')
-      })
-  }
-
-  const deleteBook = (id: number) => {
-    fetch(`http://localhost:3001/api/books/${id}`, {
-      method: 'DELETE'
-    })
-      .then(res => res.json())
-      .then(deleted => {
-        setBooks(books.filter(b => b.id !== deleted.id))
-      })
+  const handleBookDeleted = (id: number) => {
+    setBooks(prev => prev.filter(b => b.id !== id))
   }
 
   return (
-    <div>
-      <h1>Books</h1>
-
-      {/* Add new book */}
-      <input
-        value={titleInput}
-        onChange={e => setTitleInput(e.target.value)}
-        placeholder="Title"
-      />
-      <input
-        value={authorInput}
-        onChange={e => setAuthorInput(e.target.value)}
-        placeholder="Author"
-      />
-      <button onClick={addBook}>Add</button>
-
-      {/* Book list */}
-      <ul>
+    <div data-testid="app">
+      <h1 data-testid="app-title">Reading Log</h1>
+      <BookForm onBookAdded={handleBookAdded} />
+      <ul data-testid="books-list">
         {books.map(b => (
-          <li key={b.id}>
-            {editingId === b.id ? (
-              <>
-                <input value={editingTitle}  onChange={e => setEditingTitle(e.target.value)} />
-                <input value={editingAuthor} onChange={e => setEditingAuthor(e.target.value)} />
-                <button onClick={saveEdit}>Save</button>
-                <button onClick={() => setEditingId(null)}>Cancel</button>
-              </>
-            ) : (
-              <>
-                {b.title} — {b.author}
-                <button onClick={() => startEditing(b)}>Edit</button>
-                <button onClick={() => deleteBook(b.id)}>Delete</button>
-              </>
-            )}
-          </li>
+          <BookCard
+            key={b.id}
+            book={b}
+            onUpdated={handleBookUpdated}
+            onDeleted={handleBookDeleted}
+          />
         ))}
       </ul>
     </div>

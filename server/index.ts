@@ -12,7 +12,11 @@ app.use(express.json())
 db.exec(`CREATE TABLE IF NOT EXISTS books (
   id     INTEGER PRIMARY KEY AUTOINCREMENT,
   title  TEXT NOT NULL,
-  author TEXT NOT NULL
+  author TEXT NOT NULL,
+  status TEXT NOT NULL,
+  rating INTEGER,
+  date_finished TEXT,
+  notes TEXT
 )`)
 
 // Change 'users' to 'books' in every route URL and SQL query
@@ -22,16 +26,16 @@ app.get('/api/books', (req, res) => {
 })
 
 app.post('/api/books', (req, res) => {
-  const { title, author } = req.body
-  const result = db.prepare('INSERT INTO books (title, author) VALUES (?, ?)').run(title, author)
-  res.json({ id: result.lastInsertRowid, title, author })
+  const { title, author, status, rating, date_finished, notes } = req.body
+  const result = db.prepare('INSERT INTO books (title, author, status, rating, date_finished, notes) VALUES (?, ?, ?, ?, ?, ?)').run(title, author, status, rating || null, date_finished || null, notes || null)
+  res.json({ id: result.lastInsertRowid, title, author, status, rating, date_finished, notes })
 })
 
 app.put('/api/books/:id', (req, res) => {
-  const { title, author } = req.body
+  const { title, author, status, rating, date_finished, notes } = req.body
   const { id } = req.params
-  db.prepare('UPDATE books SET title = ?, author = ? WHERE id = ?').run(title, author, id)
-  res.json({ id: Number(id), title, author })
+  db.prepare('UPDATE books SET title = ?, author = ?, status = ?, rating = ?, date_finished = ?, notes = ? WHERE id = ?').run(title, author, status, rating || null, date_finished || null, notes || null, id)
+  res.json({ id: Number(id), title, author, status, rating, date_finished, notes })
 })
 
 app.delete('/api/books/:id', (req, res) => {
