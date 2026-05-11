@@ -24,7 +24,7 @@ function App() {
 
   return (
     <div data-testid="app">
-      <h1 data-testid="app-title">Reading Log</h1>
+      <h1 data-testid="app-title">Book List</h1>
       <BookForm onBookAdded={handleBookAdded} />
       <ul data-testid="books-list">
         {books.map(b => (

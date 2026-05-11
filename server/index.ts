@@ -11,7 +11,7 @@ app.use(express.json())
 // Change the table name and columns to suit a book
 db.exec(`CREATE TABLE IF NOT EXISTS books (
   id     INTEGER PRIMARY KEY AUTOINCREMENT,
-  title  TEXT NOT NULL,
+  title  TEXT NOT NULL UNIQUE,
   author TEXT NOT NULL,
   status TEXT NOT NULL,
   rating INTEGER,
@@ -64,11 +64,18 @@ app.get('/api/books/:id/links', (req, res) => {
 // Add a link to a book
 app.post('/api/books/:id/links', (req, res) => {
   const { id } = req.params
-  const { url, label, book_title } = req.body
+  const { url, label } = req.body
+  
+  // Get the book title from the books table
+  const book = db.prepare('SELECT title FROM books WHERE id = ?').get(id) as { title: string } | undefined
+  if (!book) {
+    return res.status(404).json({ error: 'Book not found' })
+  }
+  
   const result = db.prepare(
     'INSERT INTO book_links (book_id, book_title, url, label) VALUES (?, ?, ?, ?)'
-  ).run(id, book_title, url, label)
-  res.json({ id: result.lastInsertRowid, book_id: Number(id), book_title, url, label })
+  ).run(id, book.title, url, label)
+  res.json({ id: result.lastInsertRowid, book_id: Number(id), book_title: book.title, url, label })
 })
 
 // Delete a link

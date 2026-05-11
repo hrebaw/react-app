@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ── Colours ── */
+  --color-ink:           #2C2C2A;
+  --color-parchment:     #F1EFE8;
+  --color-rule:          #D3D1C7;
+  --color-rule-strong:   #B4B2A9;
+  --color-teal:          #1D9E75;
+  --color-teal-light:    #E1F5EE;
+  --color-amber:         #EF9F27;
+  --color-amber-light:   #FAEEDA;
+  --color-muted:         #888780;
+
+  /* ── Typography ── */
+  --font-display: 'Playfair Display', serif;
+  --font-body:    'Source Serif 4', serif;
+  --font-mono:    'DM Mono', monospace;
+
+  /* ── Spacing ── */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  40px;
+
+  /* ── Shape ── */
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  /* ── Borders ── */
+  --border-subtle:   0.5px solid var(--color-rule);
+  --border-strong:   0.5px solid var(--color-rule-strong);
+}
