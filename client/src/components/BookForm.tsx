@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { addBook, NewBook, Book } from '../api/books'
+import { addBook, Book } from '../api/books'
 
 type Props = {
   onBookAdded: (book: Book) => void

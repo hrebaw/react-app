@@ -19,6 +19,16 @@ db.exec(`CREATE TABLE IF NOT EXISTS books (
   notes TEXT
 )`)
 
+db.exec(`CREATE TABLE IF NOT EXISTS book_links (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  book_id     INTEGER NOT NULL,
+  book_title  TEXT NOT NULL,
+  url         TEXT NOT NULL,
+  label       TEXT NOT NULL,
+  FOREIGN KEY (book_id) REFERENCES books(id),
+  FOREIGN KEY (book_title) REFERENCES books(title)
+)`)
+
 // Change 'users' to 'books' in every route URL and SQL query
 app.get('/api/books', (req, res) => {
   const books = db.prepare('SELECT * FROM books').all()
@@ -41,6 +51,30 @@ app.put('/api/books/:id', (req, res) => {
 app.delete('/api/books/:id', (req, res) => {
   const { id } = req.params
   db.prepare('DELETE FROM books WHERE id = ?').run(id)
+  res.json({ id: Number(id) })
+})
+
+// Get all links for a specific book
+app.get('/api/books/:id/links', (req, res) => {
+  const { id } = req.params
+  const links = db.prepare('SELECT * FROM book_links WHERE book_id = ?').all(id)
+  res.json(links)
+})
+
+// Add a link to a book
+app.post('/api/books/:id/links', (req, res) => {
+  const { id } = req.params
+  const { url, label, book_title } = req.body
+  const result = db.prepare(
+    'INSERT INTO book_links (book_id, book_title, url, label) VALUES (?, ?, ?, ?)'
+  ).run(id, book_title, url, label)
+  res.json({ id: result.lastInsertRowid, book_id: Number(id), book_title, url, label })
+})
+
+// Delete a link
+app.delete('/api/links/:id', (req, res) => {
+  const { id } = req.params
+  db.prepare('DELETE FROM book_links WHERE id = ?').run(id)
   res.json({ id: Number(id) })
 })
 
